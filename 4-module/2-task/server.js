@@ -43,7 +43,6 @@ function createFileOnServer(req, res) {
         break;
       
       default:
-        console.log(err);
         res.statusCode = 500;
         res.end('Internal server error');
     }

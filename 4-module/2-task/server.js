@@ -18,22 +18,17 @@ function createFileOnServer(req, res) {
 
   const writeStream = fs.createWriteStream(filepath, { flags: 'wx' });
   const limitSizeStream = new LimitSizeStream({ limit: 1e6 });
-  const createFileStream = req.pipe(limitSizeStream).pipe(writeStream);
 
-  createFileStream.on('end', () => {
+  req.pipe(limitSizeStream).pipe(writeStream);
+  
+  limitSizeStream.on('error', errorHandler);
+  writeStream.on('error', errorHandler);
+  writeStream.on('end', () => {
     res.statusCode = 201;
     res.end('File created');
   });
 
-  req.on('aborted', () => {
-    fs.access(filepath, fs.constants.F_OK, (err) => {
-      if (!err) {
-        fs.unlinkSync(filepath);
-      }
-    });
-  });
-
-  createFileStream.on('error', (err) => {
+  function errorHandler(err) {
     switch (err.code) {
 
       case 'LIMIT_EXCEEDED':
@@ -50,6 +45,10 @@ function createFileOnServer(req, res) {
         res.statusCode = 500;
         res.end('Internal server error');
     }
+  }
+
+  req.on('aborted', () => {
+    fs.unlink(filepath, (err) => {});
   });
 }
 

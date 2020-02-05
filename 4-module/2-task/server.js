@@ -23,7 +23,7 @@ function createFileOnServer(req, res) {
   
   limitSizeStream.on('error', errorHandler);
   writeStream.on('error', errorHandler);
-  writeStream.on('end', () => {
+  writeStream.on('finish', () => {
     res.statusCode = 201;
     res.end('File created');
   });

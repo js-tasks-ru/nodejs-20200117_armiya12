@@ -23,7 +23,7 @@ function createFileOnServer(req, res) {
   
   limitSizeStream.on('error', errorHandler);
   writeStream.on('error', errorHandler);
-  writeStream.on('finish', () => {
+  writeStream.on('close', () => {
     res.statusCode = 201;
     res.end('File created');
   });
@@ -32,8 +32,11 @@ function createFileOnServer(req, res) {
     switch (err.code) {
 
       case 'LIMIT_EXCEEDED':
-        res.statusCode = 413;
-        res.end('File limit exceeded');
+        fs.unlink(filepath, (err) => {
+          if (err) throw err;
+          res.statusCode = 413;
+          res.end('File limit exceeded');
+        });
         break;
 
       case 'EEXIST':
@@ -48,7 +51,9 @@ function createFileOnServer(req, res) {
   }
 
   req.on('aborted', () => {
-    fs.unlink(filepath, (err) => {});
+    fs.unlink(filepath, (err) => {
+      if (err) throw err;
+    });
   });
 }
 

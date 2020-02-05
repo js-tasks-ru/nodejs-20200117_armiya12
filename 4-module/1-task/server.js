@@ -12,30 +12,18 @@ server.on('request', (req, res) => {
 
   switch (req.method) {
     case 'GET':
-      const stream = fs.createReadStream(filepath);
-
-      stream.pipe(res);
-
-      stream.on('error', (error) => {
-        if (error.code === 'ENOENT') {
-          res.statusCode = 404;
-          res.end('File not found');
-        } else {
-          res.statusCode = 500;
-          res.end('Internal server error');
-        }
-      });
-
-      res.on('close', () => {
-        if (res.finished) return;
-        stream.destroy();
-      });
-
-      if (pathname.includes('/') || pathname.includes('..')) {
+      const isNestedPath = /[\\/]/g.test(pathname);
+      if (isNestedPath) {
         res.statusCode = 400;
-        res.end('Nested paths are not allowed');
+        res.end();
+        break;
+      } else if (pathname !== 'index.js') {
+        res.statusCode = 404;
+        res.end();
+        break;
       }
-
+      const read = fs.createReadStream(filepath);
+      read.pipe(res);
       break;
 
     default:

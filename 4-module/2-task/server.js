@@ -26,7 +26,11 @@ function createFileOnServer(req, res) {
   });
 
   req.on('aborted', () => {
-    fs.unlinkSync(filepath);
+    fs.access(filepath, fs.constants.F_OK, (err) => {
+      if (!err) {
+        fs.unlinkSync(filepath);
+      }
+    });
   });
 
   createFileStream.on('error', (err) => {

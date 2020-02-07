@@ -12,20 +12,18 @@ const Router = require('koa-router');
 const router = new Router();
 
 const subscribers = new Map();
-let id = 0;
+
+app.use((ctx, next) => {
+  ctx.req.on('close', function() {
+    subscribers.delete(ctx.request.url);
+  });
+  return next();
+});
 
 router.get('/subscribe', async (ctx, next) => {
-  const _id = id++;
-
-  ctx.req.on('close', function() {
-    subscribers.delete(_id);
-  });
-  
   const message = await new Promise((resolve) => {
-    subscribers.set(_id, resolve);
+    subscribers.set(ctx.request.url, resolve);
   });
-  
-  subscribers.delete(_id);
   ctx.body = message;
 });
 

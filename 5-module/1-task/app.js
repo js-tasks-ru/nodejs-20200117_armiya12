@@ -15,14 +15,14 @@ const subscribers = new Map();
 
 app.use((ctx, next) => {
   ctx.req.on('close', function() {
-    subscribers.delete(ctx.request.url);
+    subscribers.delete(ctx.request);
   });
   return next();
 });
 
 router.get('/subscribe', async (ctx, next) => {
   const message = await new Promise((resolve) => {
-    subscribers.set(ctx.request.url, resolve);
+    subscribers.set(ctx.request, resolve);
   });
   ctx.body = message;
 });

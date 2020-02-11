@@ -1,6 +1,6 @@
 const Koa = require('koa');
 const Router = require('koa-router');
-const {productsBySubcategory, productList, productById, addProduct} = require('./controllers/products');
+const {productsBySubcategory, productList, productById} = require('./controllers/products');
 const {categoryList} = require('./controllers/categories');
 
 const app = new Koa();
@@ -22,21 +22,11 @@ app.use(async (ctx, next) => {
   }
 });
 
-function validationObjectId(ctx, next) {
-  const params = ctx.request.path.replace('/api/products/', '');
-  const isValid = mongoose.isValidObjectId(params);
-  if (isValid) {
-    ctx.request.params = params;
-    return next();
-  }
-  ctx.throw(400, 'Invalid ObjectId');
-};
-
 const router = new Router({prefix: '/api'});
 
 router.get('/categories', categoryList);
 router.get('/products', productsBySubcategory, productList);
-router.get('/products/:id', validationObjectId, productById);
+router.get('/products/:id', productById);
 
 app.use(router.routes());
 

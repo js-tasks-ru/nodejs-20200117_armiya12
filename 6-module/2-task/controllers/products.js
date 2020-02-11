@@ -15,7 +15,7 @@ module.exports.productsBySubcategory = async function productsBySubcategory(ctx,
 };
 
 module.exports.productList = async function productList(ctx, next) {
-  const data = await Product.find();
+  const data = await Product.find({});
   ctx.body = {
     products: data.map(mapProduct),
   };

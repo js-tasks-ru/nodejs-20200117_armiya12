@@ -32,7 +32,7 @@ const productSchema = new mongoose.Schema({
 
 });
 
-productSchema.index({
+productSchema.createIndex({
   title: 'text',
   description: 'text',
 }, {

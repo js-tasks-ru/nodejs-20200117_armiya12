@@ -6,19 +6,15 @@ module.exports = new LocalStrategy(
     session: false,
     usernameField: 'email'
   },
-  function(email, password, done) {
-    User.findOne({ email: email }, function (err, user) {
-
-      if (err) { return done(err); }
-
+  async function(email, password, done) {
+    try {
+      const user = await User.findOne({ email });
       if (!user) { return done(null, false, 'Нет такого пользователя'); }
-
-      user.checkPassword(password)
-        .then(isValid => {
-          if (isValid) { return done(null, user); }
-          return done(null, false, 'Неверный пароль');
-        })
-        .catch(err => done(err));
-    });
+      const isValidPass = await user.checkPassword(password);
+      if (!isValidPass) { return done(null, false, 'Неверный пароль'); }
+      return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
   }
 );
